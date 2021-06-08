@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main admin panel</title>
+    <style type="text/css">
+        TABLE {
+            border-collapse: collapse; /* Убираем двойные линии между ячейками */
+        }
+
+        TD, TH {
+            padding: 3px; /* Поля вокруг содержимого таблицы */
+            border: 1px solid black; /* Параметры рамки */
+        }
+
+        TH {
+            background: #b0e0e6; /* Цвет фона */
+        }
+
+        .message {
+            color: lightcoral;
+        }
+
+        li {
+            display:inline-block;
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<main>
+    <p>Hello!</p>
+    <p class="message" th:if="${!#strings.isEmpty(message)}" th:text="${message}"></p>
+    <p th:text="'Total records: ' + ${voiceMsgPage.getTotalElements()}"></p>
+    <table>
+        <thead>
+        <tr>
+            <th> fileUniqueId</th>
+            <th> fileId</th>
+            <th> username</th>
+            <th> sendtime</th>
+
+            <th> Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="message : ${voiceMsgPage}">
+            <td><span th:text="${message.fileUniqueId}"></span></td>
+            <td><span th:text="${message.fileId}"></span></td>
+            <td th:if="${!#strings.isEmpty(message.username)}"><span th:text="${message.username}"></span></td>
+            <td th:unless="${!#strings.isEmpty(message.username)}"><span>Not specified</span></td>
+            <td><span th:text="${message.sendtime}"></span></td>
+            <td>
+                <audio th:src="@{/Listen(fileId=${message.fileId})}" controls>Play</audio>
+                <a th:href ="@{/Main/Delete(fileUniqueId=${message.fileUniqueId}, returnPage=${voiceMsgPage.getNumber() + 1})}">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+
+    <nav aria-label="Page navigation">
+        <ul>
+            <li th:if="${voiceMsgPage.hasPrevious()}"><a th:href="@{'/Main/' + ${voiceMsgPage.getNumber()}}">Previous</a></li>
+
+            <li th:each="number : ${pageNumbers}">
+                <a th:href="@{'/Main/' + ${number}}"
+                th:text="${number}"></a>
+            </li>
+
+            <li th:if="${voiceMsgPage.hasNext()}"><a th:href="@{'/Main/' + ${voiceMsgPage.getNumber() + 2}}">Next</a></li>
+        </ul>
+    </nav>
+</main>
+</body>
+</html>
