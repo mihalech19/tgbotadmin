@@ -2,6 +2,8 @@ package com.mihalech19.tgbotadmin.Controllers;
 
 import com.mihalech19.tgbotadmin.Entities.VoiceMsg;
 import com.mihalech19.tgbotadmin.Interfaces.VoiceMsgRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,8 @@ import java.util.stream.IntStream;
 @Controller
 public class MainController {
 
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
+
     private final VoiceMsgRepository voiceMsgRepository;
 
     @Autowired
@@ -38,6 +42,9 @@ public class MainController {
                 .of((page != null && page > 0) ? page - 1 : 0, 10, Sort.by("sendtime").descending());
 
         Page<VoiceMsg> voiceMsgPage = voiceMsgRepository.findAll(pageable);
+
+        if(voiceMsgPage.getTotalPages() < ((page != null) ? page : 1))
+            return "redirect:/Main/" + voiceMsgPage.getTotalPages();
 
         List<Integer> pageNumbers = GetPageNumbers(voiceMsgPage);
 
@@ -54,13 +61,14 @@ public class MainController {
 
     @RequestMapping(value = "/Main/Delete")
     public RedirectView DeleteMessage(
-            @RequestParam(name = "fileUniqueId", required = true) String fileUniqueId,
+            @RequestParam(name = "fileUniqueId") String fileUniqueId,
             @RequestParam(name = "returnPage" , required = false) String returnPage,
             RedirectAttributes redirectAttrs) {
         String redirectString = (returnPage != null) ? "/Main/" + returnPage : "/Main";
         RedirectView redirectView = new RedirectView(redirectString);
         voiceMsgRepository.deleteById(fileUniqueId);
         redirectAttrs.addFlashAttribute("message", "Deletion successfully completed");
+        log.info("Message with id " + fileUniqueId + " was deleted");
         return redirectView;
 
     }
@@ -69,11 +77,10 @@ public class MainController {
         int totalPages = voiceMsgPage.getTotalPages();
         int pageNumber = (voiceMsgPage.getNumber() > 0 ) ? voiceMsgPage.getNumber() : 1;
         if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream
-                    .rangeClosed(pageNumber, (pageNumber + 4 < totalPages) ? pageNumber + 4 : totalPages )
+            return IntStream
+                    .rangeClosed(pageNumber, Math.min(pageNumber + 4, totalPages))
                     .boxed()
                     .collect(Collectors.toList());
-            return pageNumbers;
         }
         return null;
     }

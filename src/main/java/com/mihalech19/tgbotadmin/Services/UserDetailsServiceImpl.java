@@ -3,6 +3,8 @@ package com.mihalech19.tgbotadmin.Services;
 import com.mihalech19.tgbotadmin.Configs.UserDetailsImpl;
 import com.mihalech19.tgbotadmin.Interfaces.UserRepository;
 import com.mihalech19.tgbotadmin.Entities.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,11 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.logging.Logger;
+
 
 @Service("userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private static final Logger log = Logger.getLogger(UserDetailsServiceImpl.class.getName());
+
+    private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -30,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         Optional<User> user = userRepository.findById(username);
 
-        if (user == null) {
+        if (!user.isPresent()) {
             throw new UsernameNotFoundException("User not found.");
         }
 

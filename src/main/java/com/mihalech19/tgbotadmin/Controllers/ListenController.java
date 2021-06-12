@@ -2,6 +2,8 @@ package com.mihalech19.tgbotadmin.Controllers;
 
 import com.mihalech19.tgbotadmin.Interfaces.VoiceFileService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +17,9 @@ import java.net.URL;
 @Controller
 public class ListenController {
 
+    private static final Logger log = LoggerFactory.getLogger(ListenController.class);
     private final VoiceFileService tgVoiceFileService;
+
 
     @Autowired
     public ListenController(VoiceFileService tgVoiceFileService) {
@@ -23,7 +27,7 @@ public class ListenController {
     }
 
     @RequestMapping(value = "/Listen")
-    public void ListenMessage(@RequestParam(name = "fileId", required = true) String fileId, HttpServletResponse response) {
+    public void ListenMessage(@RequestParam(name = "fileId") String fileId, HttpServletResponse response) {
 
         try {
             URL fileUri = new URL(tgVoiceFileService.getFilePath(fileId));
@@ -34,8 +38,7 @@ public class ListenController {
             IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException ex) {
-            System.err.println("Error writing file to output stream.");
-            throw new RuntimeException("IOError writing file to output stream");
+            log.warn("Error writing file to output stream.", ex);
         }
     }
 }

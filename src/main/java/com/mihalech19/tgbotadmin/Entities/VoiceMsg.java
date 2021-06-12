@@ -1,8 +1,8 @@
 package com.mihalech19.tgbotadmin.Entities;
-import jdk.jfr.Enabled;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.io.Serializable;
 import java.sql.*;
 
@@ -14,7 +14,8 @@ public class VoiceMsg implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4264025677185437530L;
+	@Serial
+    private static final long serialVersionUID = 4264025677185437530L;
 
 	public VoiceMsg() {
 
